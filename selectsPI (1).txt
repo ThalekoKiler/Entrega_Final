@@ -1,0 +1,65 @@
+
+-- lista de todas as medições com informações do sensor e o local
+SELECT 
+    m.idmedicao,
+    m.data_medicao,
+    m.hora_medicao,
+    m.valor_temperatura,
+    m.valor_umidade,
+    m.status_temperatura,
+    m.status_umidade,
+    s.tipo AS tipo_sensor,
+    l.nome AS local_nome,
+    l.setor AS local_setor
+FROM medicao m
+JOIN sensor s ON m.idsensor = s.idsensor
+JOIN local l ON s.local_idlocal = l.idlocal
+ORDER BY m.data_medicao DESC, m.hora_medicao DESC;
+
+-- filtro de medições críticas de temperatura
+SELECT 
+    m.data_medicao,
+    m.hora_medicao,
+    m.valor_temperatura,
+    s.tipo AS tipo_sensor,
+    l.nome AS local_nome
+FROM medicao m
+JOIN sensor s ON m.idsensor = s.idsensor
+JOIN local l ON s.local_idlocal = l.idlocal
+WHERE m.status_temperatura = 'CRITICO'
+ORDER BY m.data_medicao DESC;
+
+-- média diária de temperatura e umidade por local
+SELECT 
+    l.nome AS local_nome,
+    m.data_medicao,
+    AVG(m.valor_temperatura) AS media_temperatura,
+    AVG(m.valor_umidade) AS media_umidade
+FROM medicao m
+JOIN sensor s ON m.idsensor = s.idsensor
+JOIN local l ON s.local_idlocal = l.idlocal
+GROUP BY l.nome, m.data_medicao
+ORDER BY m.data_medicao DESC;
+
+-- última medição registrada por sensor
+SELECT 
+    s.idsensor,
+    s.tipo AS tipo_sensor,
+    l.nome AS local_nome,
+    m.data_medicao,
+    m.hora_medicao,
+    m.valor_temperatura,
+    m.valor_umidade
+FROM sensor s
+JOIN medicao m ON s.medicao_ultimedicao = m.idmedicao
+JOIN local l ON s.local_idlocal = l.idlocal;
+
+-- quantidade de medições por status
+SELECT 
+    m.status_temperatura,
+    COUNT(*) AS qtd_registros
+FROM medicao m
+GROUP BY m.status_temperatura;
+
+
+

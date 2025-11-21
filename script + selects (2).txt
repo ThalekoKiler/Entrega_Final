@@ -1,0 +1,341 @@
+CREATE DATABASE IF NOT EXISTS packbag;
+USE packbag;
+
+CREATE TABLE local (
+    idlocal INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(45) NOT NULL UNIQUE,
+    setor VARCHAR(45),
+    descricao VARCHAR(60)
+);
+
+CREATE TABLE funcionario (
+    idfuncionario INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(45) NOT NULL,
+    telefone VARCHAR(45),
+    email VARCHAR(100) UNIQUE,
+    cpf VARCHAR(25) UNIQUE
+);
+
+CREATE TABLE sensor (
+    idsensor INT AUTO_INCREMENT PRIMARY KEY,
+    tipo VARCHAR(45) NOT NULL, 
+    dataInstalacao DATE NOT NULL,
+    funcionario_idfuncionario INT, 
+    local_idlocal INT NOT NULL,
+    medicao_ultimedicao INT,
+    FOREIGN KEY (funcionario_idfuncionario) REFERENCES funcionario(idfuncionario),
+    FOREIGN KEY (local_idlocal) REFERENCES local(idlocal)
+);
+
+CREATE TABLE medicao (
+    idmedicao INT AUTO_INCREMENT PRIMARY KEY,
+    idsensor INT NOT NULL,
+    data_medicao DATE NOT NULL,
+    hora_medicao TIME NOT NULL,
+    valor_temperatura DECIMAL(5,2) NOT NULL,
+    valor_umidade DECIMAL(5,2) NOT NULL,
+    status_temperatura ENUM('OK','CRITICO','ALERTA') NOT NULL DEFAULT 'OK',
+    status_umidade ENUM('OK','CRITICO','ALERTA') NOT NULL DEFAULT 'OK',
+    FOREIGN KEY (idsensor) REFERENCES sensor(idsensor)
+);
+
+ALTER TABLE sensor
+ADD CONSTRAINT fk_ultima_medicao
+FOREIGN KEY (medicao_ultimedicao) REFERENCES medicao(idmedicao);
+
+DELIMITER $$
+CREATE TRIGGER atualiza_ultima_medicao
+AFTER INSERT ON medicao
+FOR EACH ROW
+BEGIN
+    UPDATE sensor
+    SET medicao_ultimedicao = NEW.idmedicao
+    WHERE idsensor = NEW.idsensor;
+END$$
+
+INSERT INTO local (nome, setor, descricao) VALUES
+('Recepção Principal', 'Administrativo', 'Área de entrada e atendimento de visitantes'),
+('Sala de Reuniões A', 'Administrativo', 'Sala equipada com projetor e mesa para 10 pessoas'),
+('Sala de Reuniões B', 'Administrativo', 'Espaço menor para reuniões rápidas'),
+('Escritório Central', 'Administrativo', 'Local de trabalho dos gestores e analistas'),
+('Financeiro', 'Administrativo', 'Departamento responsável por controle de despesas'),
+('RH', 'Administrativo', 'Setor de Recursos Humanos'),
+('Desenvolvimento 1', 'Tecnologia', 'Equipe de back-end e banco de dados'),
+('Desenvolvimento 2', 'Tecnologia', 'Equipe de front-end e design'),
+('DevOps', 'Tecnologia', 'Infraestrutura e integração contínua'),
+('Suporte Técnico', 'Tecnologia', 'Atendimento de chamados internos'),
+('Teste de Software', 'Tecnologia', 'Laboratório para validação de sistemas'),
+('Data Center 1', 'Infraestrutura', 'Servidor principal da empresa'),
+('Data Center 2', 'Infraestrutura', 'Servidor de backup e redundância'),
+('Laboratório IoT', 'Pesquisa', 'Testes com sensores e dispositivos inteligentes'),
+('Laboratório de Redes', 'Pesquisa', 'Ambiente de simulação de topologias de rede'),
+('Armazém 1', 'Logística', 'Estoque de equipamentos de TI'),
+('Armazém 2', 'Logística', 'Estoque de materiais de escritório'),
+('Manutenção Predial', 'Infraestrutura', 'Equipe responsável por reparos físicos'),
+('Copa', 'Serviços Gerais', 'Espaço de alimentação dos funcionários'),
+('Auditório', 'Administrativo', 'Usado para treinamentos e eventos internos'),
+('Segurança Patrimonial', 'Infraestrutura', 'Monitoramento de câmeras e alarmes'),
+('Garagem', 'Infraestrutura', 'Estacionamento interno'),
+('Sala do CEO', 'Executivo', 'Escritório da diretoria executiva'),
+('Marketing', 'Comercial', 'Planejamento de campanhas e divulgação'),
+('Vendas', 'Comercial', 'Equipe de relacionamento com clientes e propostas'),
+('Atendimento Online', 'Comercial', 'Suporte via chat e e-mail'),
+('TI Corporativo', 'Tecnologia', 'Gestão de rede e sistemas empresariais'),
+('Backup e Recuperação', 'Infraestrutura', 'Área de controle de backups de dados'),
+('Laboratório de Prototipagem', 'Pesquisa', 'Criação de protótipos e testes físicos'),
+('Sala de Treinamento', 'Administrativo', 'Espaço para capacitação de funcionários');
+
+INSERT INTO funcionario (nome, telefone, email, cpf) VALUES
+('Lucas Silva', '11987654321', 'lucas.silva@email.com', '12345678901'),
+('Maria Oliveira', '11976543210', 'maria.oliveira@email.com', '23456789012'),
+('João Souza', '11965432109', 'joao.souza@email.com', '34567890123'),
+('Ana Santos', '11954321098', 'ana.santos@email.com', '45678901234'),
+('Pedro Lima', '11943210987', 'pedro.lima@email.com', '56789012345'),
+('Carla Rocha', '11932109876', 'carla.rocha@email.com', '67890123456'),
+('Rafael Costa', '11921098765', 'rafael.costa@email.com', '78901234567'),
+('Fernanda Martins', '11910987654', 'fernanda.martins@email.com', '89012345678'),
+('Bruno Almeida', '11876543210', 'bruno.almeida@email.com', '90123456789'),
+('Juliana Pereira', '11865432109', 'juliana.pereira@email.com', '01234567890'),
+('Gustavo Fernandes', '11854321098', 'gustavo.fernandes@email.com', '11234567890'),
+('Patrícia Rocha', '11843210987', 'patricia.rocha@email.com', '21234567890'),
+('Thiago Moreira', '11832109876', 'thiago.moreira@email.com', '31234567890'),
+('Carolina Dias', '11765432109', 'carolina.dias@email.com', '41234567890'),
+('Felipe Gomes', '11754321098', 'felipe.gomes@email.com', '51234567890'),
+('Amanda Ribeiro', '11743210987', 'amanda.ribeiro@email.com', '61234567890'),
+('Leandro Carvalho', '11732109876', 'leandro.carvalho@email.com', '71234567890'),
+('Tatiane Souza', '11654321098', 'tatiane.souza@email.com', '81234567890'),
+('Rodrigo Lima', '11643210987', 'rodrigo.lima@email.com', '91234567890'),
+('Renata Alves', '11632109876', 'renata.alves@email.com', '10234567890'),
+('Marcelo Fernandes', '11543210987', 'marcelo.fernandes@email.com', '11234567891'),
+('Vanessa Costa', '11532109876', 'vanessa.costa@email.com', '12234567891'),
+('Daniela Martins', '11521098765', 'daniela.martins@email.com', '13234567891'),
+('Eduardo Oliveira', '11432109876', 'eduardo.oliveira@email.com', '14234567891'),
+('Simone Rocha', '11421098765', 'simone.rocha@email.com', '15234567891'),
+('Vitor Souza', '11321098765', 'vitor.souza@email.com', '16234567891'),
+('Juliana Almeida', '11310987654', 'juliana.almeida@email.com', '17234567891'),
+('Carlos Dias', '11210987654', 'carlos.dias@email.com', '18234567891'),
+('Mariana Gomes', '11209876543', 'mariana.gomes@email.com', '19234567891'),
+('Felipe Martins', '11198765432', 'felipe.martins@email.com', '20234567891'),
+('Beatriz Silva', '11187654321', 'beatriz.silva@email.com', '21234567892'),
+('Lucas Rocha', '11987654322', 'lucas.rocha@email.com', '22234567892'),
+('Camila Lima', '11976543211', 'camila.lima@email.com', '23234567892'),
+('Rafael Santos', '11965432110', 'rafael.santos@email.com', '24234567892'),
+('Mariana Costa', '11954321099', 'mariana.costa@email.com', '25234567892'),
+('Gabriel Oliveira', '11943210988', 'gabriel.oliveira@email.com', '26234567892'),
+('Patrícia Pereira', '11932109877', 'patricia.pereira@email.com', '27234567892'),
+('André Gomes', '11876543211', 'andre.gomes@email.com', '28234567892'),
+('Daniela Rocha', '11865432110', 'daniela.rocha@email.com', '29234567892'),
+('Fernando Lima', '11854321099', 'fernando.lima@email.com', '30234567892'),
+('Priscila Martins', '11843210988', 'priscila.martins@email.com', '31234567892'),
+('Ricardo Dias', '11832109877', 'ricardo.dias@email.com', '32234567892'),
+('Amanda Oliveira', '11765432110', 'amanda.oliveira@email.com', '33234567892'),
+('Bruno Carvalho', '11754321099', 'bruno.carvalho@email.com', '34234567892'),
+('Carla Santos', '11743210988', 'carla.santos@email.com', '35234567892'),
+('Gustavo Lima', '11732109877', 'gustavo.lima@email.com', '36234567892'),
+('Tatiane Oliveira', '11654321099', 'tatiane.oliveira@email.com', '37234567892'),
+('Rodrigo Gomes', '11643210988', 'rodrigo.gomes@email.com', '38234567892'),
+('Renata Martins', '11632109877', 'renata.martins@email.com', '39234567892'),
+('Marcelo Dias', '11543210988', 'marcelo.dias@email.com', '40234567892'),
+('Vanessa Lima', '11532109877', 'vanessa.lima@email.com', '41234567892'),
+('Daniela Oliveira', '11521098766', 'daniela.oliveira@email.com', '42234567892');
+
+INSERT INTO sensor (tipo, dataInstalacao, funcionario_idfuncionario, local_idlocal) VALUES
+('DHT22', '2025-10-31', NULL, 1),
+('DHT22', '2025-10-31', NULL, 2),
+('DHT22', '2025-10-31', NULL, 3),
+('DHT22', '2025-10-31', NULL, 4),
+('DHT22', '2025-10-31', NULL, 5),
+('DHT22', '2025-10-31', NULL, 6),
+('DHT22', '2025-10-31', NULL, 7),
+('DHT22', '2025-10-31', NULL, 8),
+('DHT22', '2025-10-31', NULL, 9),
+('DHT22', '2025-10-31', NULL, 10),
+('DHT22', '2025-10-31', NULL, 11),
+('DHT22', '2025-10-31', NULL, 12),
+('DHT22', '2025-10-31', NULL, 13),
+('DHT22', '2025-10-31', NULL, 14),
+('DHT22', '2025-10-31', NULL, 15),
+('DHT22', '2025-10-31', NULL, 16),
+('DHT22', '2025-10-31', NULL, 17),
+('DHT22', '2025-10-31', NULL, 18),
+('DHT22', '2025-10-31', NULL, 19),
+('DHT22', '2025-10-31', NULL, 20),
+('DHT22', '2025-10-31', NULL, 21),
+('DHT22', '2025-10-31', NULL, 22),
+('DHT22', '2025-10-31', NULL, 23),
+('DHT22', '2025-10-31', NULL, 24),
+('DHT22', '2025-10-31', NULL, 25),
+('DHT22', '2025-10-31', NULL, 26),
+('DHT22', '2025-10-31', NULL, 27),
+('DHT22', '2025-10-31', NULL, 28),
+('DHT22', '2025-10-31', NULL, 29),
+('DHT22', '2025-10-31', NULL, 30);
+
+INSERT INTO medicao (idsensor, data_medicao, hora_medicao, valor_temperatura, valor_umidade, status_temperatura, status_umidade) VALUES
+(1,'2025-11-01','08:00:00',25.2,45,'OK','OK'),
+(2,'2025-11-01','08:03:00',29.0,42,'ALERTA','OK'),
+(3,'2025-11-01','08:05:00',34.1,50,'CRÍTICO','OK'),
+(4,'2025-11-01','08:08:00',27.5,55,'OK','OK'),
+(5,'2025-11-01','08:10:00',22.8,38,'OK','ALERTA'),
+(6,'2025-11-01','08:12:00',26.3,62,'OK','ALERTA'),
+(7,'2025-11-01','08:15:00',31.0,48,'ALERTA','OK'),
+(8,'2025-11-01','08:18:00',24.7,36,'OK','ALERTA'),
+(9,'2025-11-01','08:20:00',20.5,33,'CRÍTICO','CRÍTICO'),
+(10,'2025-11-01','08:23:00',28.5,40,'ALERTA','ALERTA'),
+(11,'2025-11-01','08:25:00',23.0,55,'OK','OK'),
+(12,'2025-11-01','08:28:00',32.2,67,'ALERTA','CRÍTICO'),
+(13,'2025-11-01','08:30:00',25.7,43,'OK','OK'),
+(14,'2025-11-01','08:33:00',27.9,49,'OK','OK'),
+(15,'2025-11-01','08:35:00',29.5,39,'ALERTA','ALERTA'),
+(16,'2025-11-01','08:38:00',34.8,52,'CRÍTICO','OK'),
+(17,'2025-11-01','08:40:00',21.5,58,'OK','OK'),
+(18,'2025-11-01','08:43:00',30.2,35,'ALERTA','ALERTA'),
+(19,'2025-11-01','08:45:00',26.0,61,'OK','ALERTA'),
+(20,'2025-11-01','08:48:00',23.7,44,'OK','OK'),
+(21,'2025-11-01','08:50:00',28.9,67,'ALERTA','CRÍTICO'),
+(22,'2025-11-01','08:53:00',22.3,50,'OK','OK'),
+(23,'2025-11-01','08:55:00',27.1,41,'OK','OK'),
+(24,'2025-11-01','08:58:00',33.5,36,'CRÍTICO','ALERTA'),
+(25,'2025-11-01','09:00:00',25.0,47,'OK','OK'),
+(26,'2025-11-01','09:03:00',24.2,39,'OK','ALERTA'),
+(27,'2025-11-01','09:05:00',29.8,53,'ALERTA','OK'),
+(28,'2025-11-01','09:08:00',32.7,65,'ALERTA','CRÍTICO'),
+(29,'2025-11-01','09:10:00',21.8,42,'OK','OK'),
+(30,'2025-11-01','09:13:00',26.9,58,'OK','OK'),
+(1,'2025-11-01','09:15:00',27.5,61,'OK','ALERTA'),
+(2,'2025-11-01','09:18:00',35.0,33,'CRÍTICO','CRÍTICO'),
+(3,'2025-11-01','09:20:00',23.4,45,'OK','OK'),
+(4,'2025-11-01','09:23:00',28.1,49,'ALERTA','OK'),
+(5,'2025-11-01','09:25:00',25.6,38,'OK','ALERTA'),
+(6,'2025-11-01','09:28:00',30.5,50,'ALERTA','OK'),
+(7,'2025-11-01','09:30:00',22.0,55,'OK','OK'),
+(8,'2025-11-01','09:33:00',31.3,62,'ALERTA','ALERTA'),
+(9,'2025-11-01','09:35:00',24.8,47,'OK','OK'),
+(10,'2025-11-01','09:38:00',27.0,36,'OK','ALERTA'),
+(11,'2025-11-01','09:40:00',33.2,40,'CRÍTICO','ALERTA'),
+(12,'2025-11-01','09:43:00',26.5,44,'OK','OK'),
+(13,'2025-11-01','09:45:00',29.9,53,'ALERTA','OK'),
+(14,'2025-11-01','09:48:00',25.4,60,'OK','OK'),
+(15,'2025-11-01','09:50:00',28.7,37,'ALERTA','ALERTA'),
+(16,'2025-11-01','09:53:00',34.3,51,'CRÍTICO','OK'),
+(17,'2025-11-01','09:55:00',24.1,42,'OK','OK'),
+(18,'2025-11-01','09:58:00',30.0,63,'ALERTA','ALERTA'),
+(19,'2025-11-01','10:00:00',23.3,46,'OK','OK'),
+(20,'2025-11-01','10:03:00',27.8,59,'OK','OK'),
+(21,'2025-11-01','10:05:00',26.0,48,'OK','OK'),
+(22,'2025-11-01','10:08:00',29.2,52,'ALERTA','OK'),
+(23,'2025-11-01','10:10:00',32.5,35,'ALERTA','ALERTA'),
+(24,'2025-11-01','10:13:00',34.0,38,'CRÍTICO','ALERTA'),
+(25,'2025-11-01','10:15:00',24.5,60,'OK','OK'),
+(26,'2025-11-01','10:18:00',27.8,49,'ALERTA','OK'),
+(27,'2025-11-01','10:20:00',23.0,55,'OK','OK'),
+(28,'2025-11-01','10:23:00',31.5,63,'ALERTA','ALERTA'),
+(29,'2025-11-01','10:25:00',22.8,40,'OK','ALERTA'),
+(30,'2025-11-01','10:28:00',28.9,36,'ALERTA','ALERTA'),
+(1,'2025-11-01','10:30:00',26.3,51,'OK','OK'),
+(2,'2025-11-01','10:33:00',33.2,34,'CRÍTICO','CRÍTICO'),
+(3,'2025-11-01','10:35:00',25.0,46,'OK','OK'),
+(4,'2025-11-01','10:38:00',29.5,50,'ALERTA','OK'),
+(5,'2025-11-01','10:40:00',27.0,42,'OK','OK'),
+(6,'2025-11-01','10:43:00',30.8,58,'ALERTA','ALERTA'),
+(7,'2025-11-01','10:45:00',23.5,49,'OK','OK'),
+(8,'2025-11-01','10:48:00',32.0,66,'ALERTA','CRÍTICO'),
+(9,'2025-11-01','10:50:00',24.2,44,'OK','OK'),
+(10,'2025-11-01','10:53:00',28.7,39,'ALERTA','ALERTA'),
+(11,'2025-11-01','10:55:00',34.5,52,'CRÍTICO','OK'),
+(12,'2025-11-01','10:58:00',26.5,47,'OK','OK'),
+(13,'2025-11-01','11:00:00',31.0,36,'ALERTA','ALERTA'),
+(14,'2025-11-01','11:03:00',24.8,55,'OK','OK'),
+(15,'2025-11-01','11:05:00',29.9,38,'ALERTA','ALERTA'),
+(16,'2025-11-01','11:08:00',33.5,53,'CRÍTICO','OK'),
+(17,'2025-11-01','11:10:00',23.7,41,'OK','OK'),
+(18,'2025-11-01','11:13:00',27.2,60,'OK','OK'),
+(19,'2025-11-01','11:15:00',30.5,35,'ALERTA','ALERTA'),
+(20,'2025-11-01','11:18:00',25.8,48,'OK','OK'),
+(21,'2025-11-01','11:20:00',28.3,37,'ALERTA','ALERTA'),
+(22,'2025-11-01','11:23:00',32.8,62,'ALERTA','CRÍTICO'),
+(23,'2025-11-01','11:25:00',26.7,50,'OK','OK'),
+(24,'2025-11-01','11:28:00',30.0,42,'ALERTA','OK'),
+(25,'2025-11-01','11:30:00',23.9,46,'OK','OK'),
+(26,'2025-11-01','11:33:00',34.2,34,'CRÍTICO','CRÍTICO'),
+(27,'2025-11-01','11:35:00',25.5,51,'OK','OK'),
+(28,'2025-11-01','11:38:00',29.8,39,'ALERTA','ALERTA'),
+(29,'2025-11-01','11:40:00',31.5,59,'ALERTA','ALERTA'),
+(30,'2025-11-01','11:43:00',24.7,47,'OK','OK'),
+(1,'2025-11-01','11:45:00',28.0,36,'ALERTA','ALERTA'),
+(2,'2025-11-01','11:48:00',33.8,55,'CRÍTICO','OK'),
+(3,'2025-11-01','11:50:00',26.9,49,'OK','OK'),
+(4,'2025-11-01','11:53:00',30.2,52,'ALERTA','OK'),
+(5,'2025-11-01','11:55:00',24.5,44,'OK','OK'),
+(6,'2025-11-01','11:58:00',27.6,38,'OK','ALERTA'),
+(7,'2025-11-01','12:00:00',31.2,61,'ALERTA','ALERTA'),
+(8,'2025-11-01','12:03:00',25.3,53,'OK','OK'),
+(9,'2025-11-01','12:05:00',29.0,41,'ALERTA','OK'),
+(10,'2025-11-01','12:08:00',33.0,34,'CRÍTICO','CRÍTICO');
+
+-- lista de todas as medições com informações do sensor e o local
+SELECT 
+    m.idmedicao,
+    m.data_medicao,
+    m.hora_medicao,
+    m.valor_temperatura,
+    m.valor_umidade,
+    m.status_temperatura,
+    m.status_umidade,
+    s.tipo AS tipo_sensor,
+    l.nome AS local_nome,
+    l.setor AS local_setor
+FROM medicao m
+JOIN sensor s ON m.idsensor = s.idsensor
+JOIN local l ON s.local_idlocal = l.idlocal
+ORDER BY m.data_medicao DESC, m.hora_medicao DESC;
+
+-- filtro de medições críticas de temperatura
+SELECT 
+    m.data_medicao,
+    m.hora_medicao,
+    m.valor_temperatura,
+    s.tipo AS tipo_sensor,
+    l.nome AS local_nome
+FROM medicao m
+JOIN sensor s ON m.idsensor = s.idsensor
+JOIN local l ON s.local_idlocal = l.idlocal
+WHERE m.status_temperatura = 'CRITICO'
+ORDER BY m.data_medicao DESC;
+
+-- média diária de temperatura e umidade por local
+SELECT 
+    l.nome AS local_nome,
+    m.data_medicao,
+    AVG(m.valor_temperatura) AS media_temperatura,
+    AVG(m.valor_umidade) AS media_umidade
+FROM medicao m
+JOIN sensor s ON m.idsensor = s.idsensor
+JOIN local l ON s.local_idlocal = l.idlocal
+GROUP BY l.nome, m.data_medicao
+ORDER BY m.data_medicao DESC;
+
+-- última medição registrada por sensor
+SELECT 
+    s.idsensor,
+    s.tipo AS tipo_sensor,
+    l.nome AS local_nome,
+    m.data_medicao,
+    m.hora_medicao,
+    m.valor_temperatura,
+    m.valor_umidade
+FROM sensor s
+JOIN medicao m ON s.medicao_ultimedicao = m.idmedicao
+JOIN local l ON s.local_idlocal = l.idlocal;
+
+-- quantidade de medições por status
+SELECT 
+    m.status_temperatura,
+    COUNT(*) AS qtd_registros
+FROM medicao m
+GROUP BY m.status_temperatura;
+
+
+
+
+
